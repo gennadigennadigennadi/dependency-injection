@@ -3,6 +3,8 @@
 namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -34,5 +36,20 @@ class Kernel extends BaseKernel
         } elseif (is_file($path = \dirname(__DIR__).'/config/routes.php')) {
             (require $path)($routes->withPath($path), $this);
         }
+    }
+
+    protected function build(ContainerBuilder $container)
+    {
+        $serviceDefinition = new Definition(Me::class);
+        $serviceDefinition->setArgument('$clothes', ['jeans', 'shirt']);
+
+        // only if the service is defined inside the container the CheckArgumentsValidityPass will catch this invalid service config
+        //$container->setDefinition('meAsAService', $serviceDefinition);
+
+        $randomRandomServiceDefinition = new Definition(RandomRandomService::class);
+        $randomRandomServiceDefinition->addArgument($serviceDefinition);
+        $randomRandomServiceDefinition->setPublic(true);
+
+        $container->setDefinition('myService', $randomRandomServiceDefinition);
     }
 }
